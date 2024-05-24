@@ -1,0 +1,20 @@
+[
+    {
+        "task_id": 1,
+        "task_title": "Title of Task 1",
+        "task_description": "Description of Task 1",
+        "priority": "high",
+        "due_date": "2024-05-30",
+        "is_completed": "yes",
+        "ID_category": 1
+    },
+    {
+        "task_id": 2,
+        "task_title": "Title of Task 2",
+        "task_description": "Description of Task 2",
+        "priority": "medium",
+        "due_date": "2024-06-01",
+        "is_completed": "yes",
+        "ID_category": 2
+    }
+]
