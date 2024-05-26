@@ -12,29 +12,22 @@ include './connexion.php';
 // Handle delete operation
 if (isset($_GET['delete'])) {
     $id = $_GET['delete'];
-    $stmt = $con->prepare("DELETE FROM users WHERE ID_user = :id");
+    $stmt = $con->prepare("DELETE FROM categories WHERE ID_category = :id");
     $stmt->execute([':id' => $id]);
-    header("Location: users.php");
-    exit();
+    // No need to redirect here, handle this via AJAX
+    exit(); // Exit to prevent further execution
 }
 
-// Fetch all users from the database
-// Fetch all users from the database along with their roles
-$stmt = $con->query("SELECT u.ID_user, u.username, u.email, u.password, r.role_type
-                     FROM users u
-                     JOIN roles r ON u.ID_role = r.ID_role");
-$users = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-// Fetch roles for dropdown
-$stmt = $con->query("SELECT ID_role, role_type FROM roles");
-$roles = $stmt->fetchAll(PDO::FETCH_ASSOC);
+// Fetch all categories from the database
+$stmt = $con->query("SELECT ID_category, category_name FROM categories");
+$categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Users</title>
+    <title>Manage Categories</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -46,7 +39,7 @@ $roles = $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     .table{
         margin-left: 140px;
- width: 88%;
+ width: 90%;
     }
     .h2{
         margin-left: 140px;
@@ -233,22 +226,21 @@ $roles = $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
     }
 </style>
-<body class="">
 <?php include './pages/header.php'; ?>
 
+<body class="bg-gray-200">
+
 <div class="flex">
-    
-    <!-- Content -->
     <div class="w-4/5 p-8">
         <!-- Header -->
-        <header class="header bg-black text-white mb-8">
+        <header class=" header bg-black text-white mb-8">
             <div class="container mx-auto px-6 py-3 flex justify-between items-center">
                 <!-- Logo -->
                 <div>
-                    <h1 class="text-xl font-bold">Manage Users</h1>
+                    <h1 class="text-xl font-bold">Manage Categories</h1>
                 </div>
                 <div class="voltage-button flex  text-white">
-                <button id="addUserBtn" class=" text-white px-4 py-2 ">Add User</button>
+                <button id="addCategoryBtn" class=" text-white px-4 py-2 ">Add Category</button>
                 <svg version="1.1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 234.6 61.3" preserveAspectRatio="none" xml:space="preserve">
 
 <filter id="glow">
@@ -274,160 +266,189 @@ $roles = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <div class="dot dot-5"></div>
 </div>
             </div>
-            </div>
         </header>
 
         <!-- Main Content Here -->
-        <h2 class="h2 text-2xl font-bold mb-4">User Management</h2>
+        <h2 class="h2 text-2xl font-bold mb-4">Category Management</h2>
 
-        <!-- Users Table -->
+        <!-- Categories Table -->
         <div class="table bg-white p-4 rounded-lg shadow-md">
             <table class="min-w-full bg-white">
                 <thead>
                     <tr>
-                        <th class="py-2 px-4 border-b border-gray-200">ID User</th>
-                        <th class="py-2 px-4 border-b border-gray-200">Username</th>
-                        <th class="py-2 px-4 border-b border-gray-200">Email</th>
-                        <th class="py-2 px-4 border-b border-gray-200">Password</th>
-                        <th class="py-2 px-4 border-b border-gray-200">Role</th>
+                        <th class="py-2 px-4 border-b border-gray-200">ID Category</th>
+                        <th class="py-2 px-4 border-b border-gray-200">Category Name</th>
                         <th class="py-2 px-4 border-b border-gray-200">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php
-                    if (!empty($users)) {
+                    if (!empty($categories)) {
                         // Output data for each row
-                        foreach ($users as $user) {
+                        foreach ($categories as $category) {
                             echo "<tr>";
-                            echo "<td class='py-2 px-4 border-b border-gray-200'>" . $user["ID_user"] . "</td>";
-                            echo "<td class='py-2 px-4 border-b border-gray-200'>" . $user["username"] . "</td>";
-                            echo "<td class='py-2 px-4 border-b border-gray-200'>" . $user["email"] . "</td>";
-                            echo "<td class='py-2 px-4 border-b border-gray-200'>" . $user["password"] . "</td>";
-                            echo "<td class='py-2 px-4 border-b border-gray-200'>" . $user["role_type"] . "</td>";
-                            echo "<td class='py-2 px-4 border-b border-gray-200'>
-                                    <button class='editUserBtn text-blue-600 hover:text-blue-800' data-id='" . $user["ID_user"] . "'>Edit</button> |
-                                    <a href='users.php?delete=" . $user["ID_user"] . "' class='text-red-600 hover:text-red-800' onclick='return confirm(\"Are you sure you want to delete this user?\");'>Delete</a>
-                                  </td>";
+                            echo "<td class='py-2 px-4 border-b border-gray-200'>" . $category["ID_category"] . "</td>";
+                            echo "<td class='py-2 px-4 border-b border-gray-200'>" . $category["category_name"] . "</td>";
+                            echo "<td class='py-2 px-4 border-b border-gray-200'>";
+                            echo "<a href='#' class='editCategoryBtn text-blue-600 hover:text-blue-800' data-id='" . $category["ID_category"] . "' data-name='" . $category["category_name"] . "'>Edit</a> |";
+                            echo "<button class='deleteCategoryBtn text-red-600 hover:text-red-800' data-id='" . $category["ID_category"] . "'>Delete</button>";
+                            echo "</td>";
                             echo "</tr>";
                         }
                     } else {
-                        echo "<tr><td colspan='6' class='py-2 px-4 border-b border-gray-200 text-center'>No users found</td></tr>";
+                        echo "<tr><td colspan='3' class='py-2 px-4 border-b border-gray-200 text-center'>No categories found</td></tr>";
                     }
                     ?>
                 </tbody>
-
             </table>
         </div>
     </div>
 </div>
+
 <script>
 $(document).ready(function() {
-    // Add User
-    $('#addUserBtn').click(function() {
+    // Add Category
+    $('#addCategoryBtn').click(function() {
+        // Show SweetAlert input form for adding category
         Swal.fire({
-            title: 'Add User',
-            html: `<input type="text" id="username" class="swal2-input" placeholder="Username">
-                   <input type="email" id="email" class="swal2-input" placeholder="Email">
-                   <input type="password" id="password" class="swal2-input" placeholder="Password">
-                   <select id="role" class="swal2-select">
-                       <?php
-                       foreach ($roles as $role) {
-                           echo "<option value='" . $role['ID_role'] . "'>" . $role['role_type'] . "</option>";
-                       }
-                       ?>
-                   </select>`,
-            confirmButtonText: 'Add',
+            title: 'Add Category',
+            input: 'text',
+            inputPlaceholder: 'Category Name',
             showCancelButton: true,
-            preConfirm: () => {
-                const username = Swal.getPopup().querySelector('#username').value;
-                const email = Swal.getPopup().querySelector('#email').value;
-                const password = Swal.getPopup().querySelector('#password').value;
-                const role = Swal.getPopup().querySelector('#role').value;
-                            // Send data to server to add user
-            $.ajax({
-                type: 'POST',
-                url: '/users/add_user.php',
-                data: {
-                    username: username,
-                    email: email,
-                    password: password,
-                    role: role
-                },
-                success: function(response) {
-                    // Reload page after adding user
-                    window.location.reload();
-                },
-                error: function(xhr, status, error) {
-                    console.error(xhr.responseText);
-                    Swal.showValidationMessage(
-                        `Request failed: ${error}`
-                    )
-                }
-            });
-        }
-    });
-});
+            confirmButtonText: 'Add',
+            showLoaderOnConfirm: true,
+            preConfirm: (categoryName) => {
+                // Send AJAX request to add category
+                return $.ajax({
+                    url: 'add_category.php',
+                    type: 'POST',
+                    data: {
+                        category_name: categoryName
+                    },
+                    dataType: 'json' // Specify JSON as the expected response type
+                });
+            },
+            allowOutsideClick: () => !Swal.isLoading()
+        }).then((result) => {
+            // Handle success or error response
+            if (result.isConfirmed) {
+                if (result.value.success) {
+                    // Add the newly added category to the category list
+                    var newCategory = result.value.category;
+                    var newRow = "<tr>" +
+                        "<td class='py-2 px-4 border-b border-gray-200'>" + newCategory.ID_category + "</td>" +
+                        "<td class='py-2 px-4 border-b border-gray-200'>" + newCategory.category_name + "</td>" +
+                        "<td class='py-2 px-4 border-b border-gray-200'>" +
+                        "<a href='#' class='editCategoryBtn text-blue-600 hover:text-blue-800' data-id='" + newCategory.ID_category + "' data-name='" + newCategory.category_name + "'>Edit</a> |" +
+                        "<button class='deleteCategoryBtn text-red-600 hover:text-red-800' data-id='" + newCategory.ID_category + "'>Delete</button>" +
+                        "</td>" +
+                        "</tr>";
 
-// Edit User
-$('.editUserBtn').click(function() {
-    const userId = $(this).data('id');
+                    // Append the new row to the table body
+                    $('table tbody').append(newRow);
 
-    // Fetch user data for editing
-    $.ajax({
-        type: 'POST',
-        url: '/users/fetch_user.php',
-        data: {
-            id: userId,
-            roles: <?php echo json_encode($roles); ?> // Pass roles variable
-        },
-        success: function(response) {
-            // Display user data for editing
-            Swal.fire({
-                title: 'Edit User',
-                html: response,
-                confirmButtonText: 'Save',
-                showCancelButton: true,
-                preConfirm: () => {
-                    const username = $('#username').val();
-                    const email = $('#email').val();
-                    const password = $('#password').val();
-                    const role = $('#role').val();
-
-                    // Send data to server to update user
-                    $.ajax({
-                        type: 'POST',
-                        url: '/users/edit_user.php',
-                        data: {
-                            ID_user: userId,
-                            username: username,
-                            email: email,
-                            password: password,
-                            ID_role: role
-                        },
-                        success: function(response) {
-                            // Reload page after updating user
-                            window.location.reload();
-                        },
-                        error: function(xhr, status, error) {
-                            console.error(xhr.responseText);
-                            Swal.showValidationMessage(
-                                `Request failed: ${error}`
-                            )
-                        }
+                    // Show success message
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Category Added Successfully!'
+                    });
+                } else {
+                    // Show error message if needed
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: result.value.error || 'Failed to add category!'
                     });
                 }
-            });
-        },
-        error: function(xhr, status, error) {
-            console.error(xhr.responseText);
-            Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: 'Something went wrong!'
-            });
-        }
+            }
+        });
     });
-});
+
+    // Edit Category
+    $(document).on('click', '.editCategoryBtn', function() {
+        const categoryId = $(this).data('id');
+        const categoryName = $(this).data('name');
+
+        // Show SweetAlert input form for editing category
+        Swal.fire({
+            title: 'Edit Category',
+            input: 'text',
+            inputValue: categoryName,
+            inputPlaceholder: 'Category Name',
+            showCancelButton: true,
+            confirmButtonText: 'Save',
+            showLoaderOnConfirm: true,
+            preConfirm: (newCategoryName) => {
+                // Send AJAX request to edit category
+                return $.ajax({
+                    url: 'edit_category.php',
+                    type: 'POST',
+                    data: {
+                        categoryID: categoryId, // Change to categoryID
+                        categoryName: newCategoryName // Change to categoryName
+                    },
+                    dataType: 'json' // Specify JSON as the expected response type
+                });
+            },
+            allowOutsideClick: () => !Swal.isLoading()
+        }).then((result) => {
+            // Handle success or error response
+            if (result.isConfirmed) {
+                if (result.value.success) {
+                    // Update the category name in the UI
+                    $(`.editCategoryBtn[data-id='${categoryId}']`).data('name', result.value.categoryName);
+                    $(`.editCategoryBtn[data-id='${categoryId}']`).closest('tr').find('td:eq(1)').text(result.value.categoryName);
+                    // Show success message
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Category Updated Successfully!'
+                    });
+                } else {
+                    // Show error message if needed
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: result.value.error || 'Failed to edit category!'
+                    });
+                }
+            }
+        });
+    });
+
+    // Delete Category
+    $(document).on('click', '.deleteCategoryBtn', function() {
+        const categoryId = $(this).data('id');
+        // Show confirmation dialog before deleting category
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Send AJAX request to delete category
+                $.ajax({
+                    url: 'categories.php?delete=' + categoryId,
+                    type: 'GET',
+                    success: function(response) {
+                        // Reload page or update UI as needed
+                        window.location.reload();
+                    },
+                    error: function(xhr, status, error) {
+                        // Show error message if needed
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: 'Failed to delete category!'
+                        });
+                    }
+                });
+            }
+        });
+    });
 });
 </script>
 

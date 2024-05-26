@@ -6,7 +6,9 @@
         "priority": "high",
         "due_date": "2024-05-30",
         "is_completed": "yes",
-        "ID_category": 1
+        "ID_category": 1,
+        "ID_user": 1
+
     },
     {
         "task_id": 2,
@@ -15,6 +17,9 @@
         "priority": "medium",
         "due_date": "2024-06-01",
         "is_completed": "yes",
-        "ID_category": 2
+        "ID_category": 2,
+        "ID_user": 1
+
+
     }
 ]

@@ -1,5 +1,5 @@
 <?php
-require_once '../connexion.php'; // Include your database connection file here
+require_once './connexion.php'; // Include your database connection file here
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $task_id = $_POST['task_id'];
